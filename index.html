@@ -140,6 +140,7 @@
             padding: 0 16px 40px;
             min-height: 100vh;
             transition: background var(--transition), color var(--transition);
+            position: relative;
         }
 
         /* ────────────── СКРОЛЛБАР ────────────── */
@@ -388,6 +389,7 @@
         }
         .week-header span {
             padding: 4px 0;
+            cursor: default;
         }
 
         /* ───── НЕДЕЛЯ ───── */
@@ -408,6 +410,7 @@
             transition: var(--transition);
             position: relative;
             border: 1px solid transparent;
+            cursor: default;
         }
         .day-cell.other-month {
             opacity: 0.4;
@@ -500,6 +503,42 @@
         }
         .olympiad-bar:hover .bar-tooltip {
             display: block;
+        }
+
+        /* ────────────── КРОШКИ (пасхалка) ────────────── */
+        .crumb-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            overflow: hidden;
+        }
+        .crumb {
+            position: absolute;
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #2a2a2a;
+            opacity: 1;
+            animation: crumbFall 2s ease-in forwards;
+            pointer-events: none;
+            text-shadow: 0 0 4px rgba(255,255,255,0.5);
+        }
+        [data-theme="dark"] .crumb {
+            color: #f0f0f0;
+            text-shadow: 0 0 4px rgba(0,0,0,0.5);
+        }
+        @keyframes crumbFall {
+            0% {
+                opacity: 1;
+                transform: translateY(0) rotate(0deg) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(300px) rotate(720deg) scale(0.3);
+            }
         }
 
         /* ────────────── МОДАЛЬНОЕ ОКНО ────────────── */
@@ -906,6 +945,7 @@
         // 2.  ПОМОЩНИКИ
         // ──────────────────────────────────────────────────────────────
         const ADMIN_UID = "USUg0QaBBNgtR6NmcIDj02zgqop1";
+        const CHAOS_UID = "rQtBuOUm2dPFAUZpDpGUeSYG9fh2";
 
         function formatDate(d) {
             if (!d) return '—';
@@ -957,22 +997,22 @@
         // Генерация пастельного цвета (HSL)
         function generatePastelColor() {
             const hue = Math.floor(Math.random() * 360);
-            const sat = 40 + Math.floor(Math.random() * 30); // 40–70%
-            const light = 70 + Math.floor(Math.random() * 20); // 70–90%
+            const sat = 40 + Math.floor(Math.random() * 30);
+            const light = 70 + Math.floor(Math.random() * 20);
             return `hsl(${hue}, ${sat}%, ${light}%)`;
         }
 
-        // Функция для определения цвета текста (чёрный или белый) по яркости фона
         function getContrastColor(hslColor) {
-            // Извлекаем Lightness из hsl(h, s%, l%)
             const match = hslColor.match(/hsl\(\s*(\d+)\s*,\s*(\d+)%\s*,\s*(\d+)%\s*\)/);
             if (match) {
                 const light = parseInt(match[3], 10);
                 return light > 55 ? '#2a2a2a' : '#f0f0f0';
             }
-            // Если не удалось распарсить, возвращаем тёмный по умолчанию
             return '#2a2a2a';
         }
+
+        // Список фраз для крошек
+        const CRUMB_PHRASES = ["%", "*", "-", "=", "+", "239", "617", "69", "?", "⛏︎", "√", "∞", "log", "♞", "⊙", "p", "c++", "⬅", "№", "CН", "兀", "½", "ᔑ", "К&Б", "мц", "⚅","%", "*", "-", "=", "+", "239", "617", "69", "?", "⛏︎", "√", "∞", "log", "♞", "⊙", "p", "c++", "⬅", "№", "CН", "兀", "½", "ᔑ", "К&Б", "мц", "⚅","%", "*", "-", "=", "+", "239", "617", "69", "?", "⛏︎", "√", "∞", "log", "♞", "⊙", "p", "c++", "⬅", "№", "CН", "兀", "½", "ᔑ", "К&Б", "мц", "⚅","%", "*", "-", "=", "+", "239", "617", "69", "?", "⛏︎", "√", "∞", "log", "♞", "⊙", "p", "c++", "⬅", "№", "CН", "兀", "½", "ᔑ", "К&Б", "мц", "⚅","%", "*", "-", "=", "+", "239", "617", "69", "?", "⛏︎", "√", "∞", "log", "♞", "⊙", "p", "c++", "⬅", "№", "CН", "兀", "½", "ᔑ", "К&Б", "мц", "⚅","Катя"];
 
         // ──────────────────────────────────────────────────────────────
         // 3.  REACT ПРИЛОЖЕНИЕ
@@ -1489,7 +1529,6 @@
             else if (!isLast) cutClass = 'bar-cut-right';
 
             const bgColor = olympiad.color || '#dce8f0';
-            // Вычисляем контрастный цвет текста
             const textColor = getContrastColor(bgColor);
 
             const handleContext = (e) => {
@@ -1502,7 +1541,6 @@
                     e.preventDefault();
                     if (onEdit) onEdit(olympiad);
                 } else {
-                    // обычный клик — открываем модалку
                     if (onLeftClick) onLeftClick(olympiad);
                 }
             };
@@ -1525,10 +1563,72 @@
             );
         }
 
+        // ──── КОМПОНЕНТ КРОШЕК ────
+        function CrumbContainer() {
+            const [crumbs, setCrumbs] = useState([]);
+            const counterRef = useRef(0);
+
+            const addCrumbs = useCallback((x, y, count = 3) => {
+                const newCrumbs = [];
+                const phrases = CRUMB_PHRASES;
+                for (let i = 0; i < count; i++) {
+                    const text = phrases[Math.floor(Math.random() * phrases.length)];
+                    const offsetX = (Math.random() - 0.5) * 120;
+                    const offsetY = (Math.random() - 0.5) * 40;
+                    const id = counterRef.current++;
+                    newCrumbs.push({
+                        id,
+                        text,
+                        x: x + offsetX,
+                        y: y + offsetY,
+                        rotation: Math.random() * 360,
+                        scale: 0.6 + Math.random() * 0.8,
+                    });
+                }
+                setCrumbs(prev => [...prev, ...newCrumbs]);
+                setTimeout(() => {
+                    setCrumbs(prev => prev.filter(c => !newCrumbs.some(nc => nc.id === c.id)));
+                }, 2500);
+            }, []);
+
+            // Вешаем глобальный обработчик кликов по заголовкам дней недели (Ср и Сб)
+            useEffect(() => {
+                const handler = (e) => {
+                    const target = e.target.closest('.week-header span[data-day="3"], .week-header span[data-day="6"]');
+                    if (!target) return;
+                    const rect = target.getBoundingClientRect();
+                    const x = rect.left + rect.width / 2;
+                    const y = rect.top + rect.height / 2;
+                    const count = 3 + Math.floor(Math.random() * 3); // 3-5
+                    addCrumbs(x, y, count);
+                };
+                document.addEventListener('click', handler);
+                return () => document.removeEventListener('click', handler);
+            }, [addCrumbs]);
+
+            return React.createElement('div', { className: 'crumb-container' },
+                crumbs.map(crumb =>
+                    React.createElement('div', {
+                        key: crumb.id,
+                        className: 'crumb',
+                        style: {
+                            left: crumb.x + 'px',
+                            top: crumb.y + 'px',
+                            transform: `rotate(${crumb.rotation}deg) scale(${crumb.scale})`,
+                            animationDuration: (1.5 + Math.random()) + 's',
+                        }
+                    }, crumb.text)
+                )
+            );
+        }
+
         // ──── ЯЧЕЙКА ДНЯ ────
-        function DayCell({ date, olympiads, isToday, isOtherMonth, onBarRightClick, onBarEdit, onBarLeftClick }) {
+        function DayCell({ date, olympiads, isToday, isOtherMonth, onBarRightClick, onBarEdit, onBarLeftClick, isChaos }) {
             const dayBars = getBarsForDay(olympiads, date);
             const dayNum = date.getDate();
+
+            // Если режим хаоса, показываем случайное число
+            const displayDay = isChaos ? Math.floor(Math.random() * 31) + 1 : dayNum;
 
             const bars = dayBars.map(o => {
                 const start = dateOnly(o.startTime);
@@ -1544,7 +1644,7 @@
             return React.createElement('div', {
                 className: `day-cell ${isOtherMonth ? 'other-month' : ''} ${isToday ? 'today' : ''}`
             },
-                React.createElement('span', { className: 'day-number' }, dayNum),
+                React.createElement('span', { className: 'day-number' }, displayDay),
                 React.createElement('div', { className: 'day-bars' },
                     bars.map((o, idx) => React.createElement(OlympiadBar, {
                         key: o.id + '-' + idx,
@@ -1560,7 +1660,7 @@
         }
 
         // ──── НЕДЕЛЯ ────
-        function WeekRow({ week, olympiads, today, onBarRightClick, onBarEdit, onBarLeftClick }) {
+        function WeekRow({ week, olympiads, today, onBarRightClick, onBarEdit, onBarLeftClick, isChaos }) {
             return React.createElement('div', { className: 'week-row' },
                 week.map((day, idx) => {
                     const isToday = today && isSameDay(day, today);
@@ -1574,20 +1674,30 @@
                         onBarRightClick,
                         onBarEdit,
                         onBarLeftClick,
+                        isChaos,
                     });
                 })
             );
         }
 
         // ──── МЕСЯЦ ────
-        function MonthBlock({ month, olympiads, today, onBarRightClick, onBarEdit, onBarLeftClick }) {
+        function MonthBlock({ month, olympiads, today, onBarRightClick, onBarEdit, onBarLeftClick, isChaos }) {
             const weekDays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
             const isInMonth = (d) => d.getMonth() === month.month && d.getFullYear() === month.year;
 
+            // Если хаос, меняем название месяца на случайное
+            const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+            const displayLabel = isChaos ?
+                monthNames[Math.floor(Math.random() * monthNames.length)] + ' ' + (Math.floor(Math.random() * 100) + 2000) :
+                month.label;
+
             return React.createElement('div', { className: 'month-block' },
-                React.createElement('div', { className: 'month-label' }, month.label),
+                React.createElement('div', { className: 'month-label' }, displayLabel),
                 React.createElement('div', { className: 'week-header' },
-                    weekDays.map(d => React.createElement('span', { key: d }, d))
+                    weekDays.map((d, idx) => {
+                        const dayIndex = idx + 1; // 1-пн, 7-вс
+                        return React.createElement('span', { key: d, 'data-day': dayIndex }, d);
+                    })
                 ),
                 month.weeks.map((week, wi) => {
                     const hasMonthDays = week.some(d => isInMonth(d));
@@ -1600,13 +1710,14 @@
                         onBarRightClick,
                         onBarEdit,
                         onBarLeftClick,
+                        isChaos,
                     });
                 })
             );
         }
 
         // ──── КАЛЕНДАРЬ ────
-        function Calendar({ olympiads, onBarRightClick, onBarEdit, onBarLeftClick }) {
+        function Calendar({ olympiads, onBarRightClick, onBarEdit, onBarLeftClick, isChaos }) {
             const [today] = useState(new Date());
             const scrollRef = useRef(null);
             const [hasScrolled, setHasScrolled] = useState(false);
@@ -1662,6 +1773,7 @@
                         onBarRightClick,
                         onBarEdit,
                         onBarLeftClick,
+                        isChaos,
                     }))
                 )
             );
@@ -1732,11 +1844,13 @@
             const [clickCount, setClickCount] = useState(0);
             const [clickTimer, setClickTimer] = useState(null);
 
-            // Применяем тему и класс банана
+            // Администратор — если UID совпадает с ADMIN_UID или CHAOS_UID
+            const isAdmin = user && (user.uid === ADMIN_UID || user.uid === CHAOS_UID);
+            const isChaos = user && user.uid === CHAOS_UID;
+
             useEffect(() => {
                 document.documentElement.setAttribute('data-theme', theme);
                 localStorage.setItem('theme', theme);
-                // Убираем банановый класс, если он был
                 document.documentElement.classList.remove('banana-theme');
                 if (bananaActive) {
                     document.documentElement.classList.add('banana-theme');
@@ -1744,7 +1858,6 @@
             }, [theme, bananaActive]);
 
             const toggleTheme = () => {
-                // Если банановая активна — выключаем её и возвращаем предыдущую тему
                 if (bananaActive) {
                     setBananaActive(false);
                     setTheme(previousTheme);
@@ -1756,10 +1869,8 @@
                     return;
                 }
 
-                // Обработка пасхалки: считаем клики
                 const now = Date.now();
                 if (clickCount === 0) {
-                    // первый клик, запускаем таймер на 10 секунд
                     const timer = setTimeout(() => {
                         setClickCount(0);
                         setClickTimer(null);
@@ -1769,7 +1880,6 @@
                 const newCount = clickCount + 1;
                 setClickCount(newCount);
                 if (newCount > 5) {
-                    // Активируем банановую тему
                     setPreviousTheme(theme);
                     setBananaActive(true);
                     setClickCount(0);
@@ -1779,12 +1889,8 @@
                     }
                     return;
                 }
-
-                // Обычное переключение светлая/тёмная
                 setTheme(prev => prev === 'light' ? 'dark' : 'light');
             };
-
-            const isAdmin = user && (ADMIN_UID ? user.uid === ADMIN_UID : true);
 
             const handleBarRightClick = (olympiad) => {
                 setSelectedOlympiad(olympiad);
@@ -1870,9 +1976,15 @@
                 React.createElement('div', { className: 'app-header' },
                     React.createElement('h1', null, '📅 Расписание олимпиад'),
                     React.createElement('div', { className: 'header-actions' },
-                        isAdmin && React.createElement('button', { className: 'btn btn-primary', onClick: handleAdd },
+                        isAdmin && !isChaos && React.createElement('button', { className: 'btn btn-primary', onClick: handleAdd },
                             '➕ Добавить'
                         ),
+                        isAdmin && isChaos && React.createElement('a', {
+                            href: 'https://t.me/daunsheld',
+                            target: '_blank',
+                            rel: 'noopener',
+                            className: 'btn btn-primary'
+                        }, '🎮 Играть'),
                         !user ?
                         React.createElement('button', { className: 'btn btn-outline', onClick: handleLogin },
                             '🔑 Вход для админа'
@@ -1901,6 +2013,7 @@
                     onBarRightClick: handleBarRightClick,
                     onBarEdit: handleBarEdit,
                     onBarLeftClick: handleBarLeftClick,
+                    isChaos,
                 }),
 
                 // Кнопка-триггер сайдбара
@@ -1960,7 +2073,9 @@
                             }, '🗑 Удалить')
                         )
                     )
-                )
+                ),
+                // Контейнер для крошек
+                React.createElement(CrumbContainer, null)
             );
         }
 
