@@ -1,0 +1,1865 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Календарь олимпиад 2026–2027</title>
+
+    <!-- React & ReactDOM -->
+    <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js">
+    </script>
+
+    <!-- Firebase (Compat v9) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js">
+    </script>
+
+    <style>
+        /* ────────────── ГЛОБАЛЬНЫЙ СБРОС И ПЕРЕМЕННЫЕ ────────────── */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-body: #faf8f5;
+            --bg-card: #ffffff;
+            --bg-header: #f3efe9;
+            --text-primary: #3d3a36;
+            --text-secondary: #6b6460;
+            --text-light: #a09890;
+            --border-light: #e8e0d8;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 6px 24px rgba(0, 0, 0, 0.07);
+            --radius: 12px;
+            --radius-sm: 6px;
+            --transition: 0.2s ease;
+
+            /* пастельная палитра */
+            --pastel-blue: #dce8f0;
+            --pastel-green: #dceee4;
+            --pastel-pink: #f5e0e8;
+            --pastel-lavender: #e8e0f0;
+            --pastel-peach: #f5ede0;
+            --pastel-mint: #ddf0ea;
+            --pastel-yellow: #f5f0d8;
+            --pastel-red: #f5d8d8;
+            --pastel-coral: #f5e0d8;
+
+            /* Цвета полос по уровням */
+            --level-1: #c8d8e8;
+            --level-2: #d4e4d4;
+            --level-3: #f0e0d0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg-body);
+            color: var(--text-primary);
+            line-height: 1.5;
+            padding: 0 16px 40px;
+            min-height: 100vh;
+        }
+
+        /* ────────────── СКРОЛЛБАР ────────────── */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-body);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d5cec6;
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #c0b8ae;
+        }
+
+        /* ────────────── ЗАГРУЗОЧНЫЙ СПИННЕР ────────────── */
+        .spinner {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--border-light);
+            border-top-color: var(--text-secondary);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .loading-overlay {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+
+        /* ────────────── КОНТЕЙНЕРЫ ────────────── */
+        .app {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* ────────────── ШАПКА ────────────── */
+        .app-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 0 12px;
+            border-bottom: 1px solid var(--border-light);
+            margin-bottom: 20px;
+            gap: 12px 16px;
+        }
+        .app-header h1 {
+            font-weight: 400;
+            font-size: 1.6rem;
+            letter-spacing: -0.3px;
+            color: var(--text-primary);
+        }
+        .app-header h1 small {
+            font-weight: 300;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-left: 10px;
+        }
+        .header-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* ────────────── КНОПКИ ────────────── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 18px;
+            border: none;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: 450;
+            cursor: pointer;
+            transition: var(--transition);
+            background: var(--bg-card);
+            color: var(--text-primary);
+            box-shadow: var(--shadow-sm);
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+        .btn:active {
+            transform: translateY(0);
+        }
+        .btn-primary {
+            background: var(--pastel-blue);
+            color: #2a4a5a;
+        }
+        .btn-primary:hover {
+            background: #d0dde8;
+        }
+        .btn-success {
+            background: var(--pastel-green);
+            color: #1a4a3a;
+        }
+        .btn-success:hover {
+            background: #c8e0d4;
+        }
+        .btn-danger {
+            background: var(--pastel-red);
+            color: #7a3a3a;
+        }
+        .btn-danger:hover {
+            background: #f0c8c8;
+        }
+        .btn-warning {
+            background: var(--pastel-yellow);
+            color: #6a5a2a;
+        }
+        .btn-warning:hover {
+            background: #ebe0c0;
+        }
+        .btn-outline {
+            background: transparent;
+            box-shadow: none;
+            border: 1px solid var(--border-light);
+        }
+        .btn-outline:hover {
+            background: var(--bg-header);
+        }
+        .btn-sm {
+            padding: 4px 12px;
+            font-size: 0.8rem;
+        }
+        .btn-icon {
+            padding: 6px 10px;
+            border-radius: 30px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            transition: var(--transition);
+        }
+        .btn-icon:hover {
+            background: var(--bg-header);
+            color: var(--text-primary);
+        }
+
+        /* ────────────── ВИДЖЕТ РЕГИСТРАЦИЙ ────────────── */
+        .registration-widget {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 12px 16px;
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 18px;
+            border: 1px solid var(--border-light);
+            min-height: 52px;
+            align-items: center;
+        }
+        .registration-widget .empty {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+        .reg-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 14px 5px 16px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            background: var(--bg-body);
+            border: 1px solid var(--border-light);
+            transition: var(--transition);
+        }
+        .reg-tag.active {
+            background: var(--pastel-red);
+            border-color: #e8c8c8;
+        }
+        .reg-tag.upcoming {
+            background: var(--pastel-yellow);
+            border-color: #e8ddb8;
+        }
+        .reg-tag .reg-name {
+            font-weight: 500;
+            max-width: 160px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .reg-tag .reg-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 450;
+        }
+        .reg-tag .reg-link:hover {
+            color: var(--text-primary);
+            text-decoration: underline;
+        }
+        .reg-tag .reg-badge {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            font-weight: 400;
+        }
+
+        /* ────────────── КАЛЕНДАРЬ ────────────── */
+        .calendar-wrapper {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .calendar-scroll {
+            max-height: 82vh;
+            overflow-y: auto;
+            padding: 0 2px 12px 2px;
+            scroll-behavior: smooth;
+        }
+
+        /* ───── МЕСЯЦ ───── */
+        .month-block {
+            padding: 16px 12px 4px 12px;
+        }
+        .month-label {
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: var(--text-secondary);
+            padding: 6px 0 10px 6px;
+            letter-spacing: -0.2px;
+            border-bottom: 1px solid var(--border-light);
+            margin-bottom: 10px;
+        }
+
+        /* ───── ДНИ НЕДЕЛИ (шапка) ───── */
+        .week-header {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            padding: 0 4px 6px 4px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-light);
+            font-weight: 500;
+            text-align: center;
+        }
+        .week-header span {
+            padding: 4px 0;
+        }
+
+        /* ───── НЕДЕЛЯ ───── */
+        .week-row {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            padding: 0 4px;
+            margin-bottom: 2px;
+        }
+
+        /* ───── ДЕНЬ ───── */
+        .day-cell {
+            background: var(--bg-body);
+            border-radius: var(--radius-sm);
+            padding: 4px 6px 6px 6px;
+            min-height: 72px;
+            transition: var(--transition);
+            position: relative;
+            border: 1px solid transparent;
+        }
+        .day-cell.other-month {
+            opacity: 0.4;
+        }
+        .day-cell.today {
+            background: #f5f0ea;
+            border-color: #d5cec6;
+        }
+        .day-cell .day-number {
+            font-size: 0.8rem;
+            font-weight: 450;
+            color: var(--text-secondary);
+            padding-bottom: 2px;
+            display: block;
+            text-align: right;
+        }
+        .day-cell.today .day-number {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* ───── ПОЛОСЫ ОЛИМПИАД ───── */
+        .day-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-height: 18px;
+        }
+
+        .olympiad-bar {
+            position: relative;
+            border-radius: var(--radius-sm);
+            padding: 2px 8px 2px 8px;
+            font-size: 0.7rem;
+            font-weight: 450;
+            line-height: 1.4;
+            color: #2a2a2a;
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-height: 20px;
+            background: var(--pastel-blue);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            user-select: none;
+        }
+        .olympiad-bar:hover {
+            filter: brightness(0.96);
+            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
+            z-index: 2;
+        }
+        .olympiad-bar.bar-cut-left {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+        .olympiad-bar.bar-cut-right {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+        .olympiad-bar.bar-cut-both {
+            border-radius: 0;
+        }
+
+        .olympiad-bar .bar-tooltip {
+            display: none;
+            position: absolute;
+            bottom: calc(100% + 6px);
+            left: 0;
+            background: #2a2a2a;
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            white-space: normal;
+            max-width: 280px;
+            z-index: 20;
+            font-weight: 400;
+            pointer-events: none;
+            box-shadow: var(--shadow-md);
+        }
+        .olympiad-bar:hover .bar-tooltip {
+            display: block;
+        }
+
+        /* Цвета уровней */
+        .olympiad-bar.level-1 {
+            background: var(--level-1);
+        }
+        .olympiad-bar.level-2 {
+            background: var(--level-2);
+        }
+        .olympiad-bar.level-3 {
+            background: var(--level-3);
+        }
+
+        /* ────────────── МОДАЛЬНОЕ ОКНО ────────────── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(30, 28, 26, 0.35);
+            backdrop-filter: blur(2px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+            animation: fadeIn 0.2s ease;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.97);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        .modal-box {
+            background: #fff;
+            border-radius: var(--radius);
+            max-width: 620px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 28px 32px 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            position: relative;
+        }
+        .modal-box .modal-close {
+            position: absolute;
+            top: 14px;
+            right: 18px;
+            background: none;
+            border: none;
+            font-size: 1.6rem;
+            cursor: pointer;
+            color: var(--text-light);
+            transition: var(--transition);
+            line-height: 1;
+        }
+        .modal-box .modal-close:hover {
+            color: var(--text-primary);
+        }
+        .modal-box h2 {
+            font-weight: 400;
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+            padding-right: 32px;
+            color: var(--text-primary);
+        }
+        .modal-box .field {
+            display: flex;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border-light);
+            font-size: 0.92rem;
+        }
+        .modal-box .field .label {
+            font-weight: 450;
+            min-width: 120px;
+            color: var(--text-secondary);
+        }
+        .modal-box .field .value {
+            color: var(--text-primary);
+            word-break: break-word;
+        }
+        .modal-box .field:last-child {
+            border-bottom: none;
+        }
+        .modal-box .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        /* ────────────── ФОРМА ────────────── */
+        .form-group {
+            margin-bottom: 14px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 450;
+            color: var(--text-secondary);
+            margin-bottom: 3px;
+        }
+        .form-group label .required {
+            color: #c05050;
+            margin-left: 2px;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            background: var(--bg-body);
+            transition: var(--transition);
+            color: var(--text-primary);
+            font-family: inherit;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #b8b0a8;
+            box-shadow: 0 0 0 3px rgba(180, 170, 160, 0.15);
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+        .form-group .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 0;
+        }
+        .form-group .checkbox-group input[type="checkbox"] {
+            width: auto;
+            accent-color: var(--text-secondary);
+            transform: scale(1.1);
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 18px;
+            flex-wrap: wrap;
+        }
+
+        /* ────────────── САЙДБАР (регистрации) ────────────── */
+        .sidebar-toggle {
+            position: fixed;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-left: none;
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            padding: 12px 8px 12px 10px;
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+            z-index: 50;
+            font-size: 1.2rem;
+            transition: var(--transition);
+            color: var(--text-secondary);
+        }
+        .sidebar-toggle:hover {
+            background: var(--bg-header);
+        }
+        .sidebar-toggle .badge {
+            display: block;
+            font-size: 0.6rem;
+            background: var(--pastel-red);
+            color: #5a3a3a;
+            border-radius: 20px;
+            padding: 0 6px;
+            text-align: center;
+            margin-top: 2px;
+        }
+
+        .registration-sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 340px;
+            max-width: 80vw;
+            background: var(--bg-card);
+            border-right: 1px solid var(--border-light);
+            box-shadow: var(--shadow-md);
+            z-index: 60;
+            transform: translateX(-110%);
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            padding: 20px 16px 20px 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .registration-sidebar.open {
+            transform: translateX(0);
+        }
+        .registration-sidebar .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-light);
+            margin-bottom: 16px;
+        }
+        .registration-sidebar .sidebar-header h3 {
+            font-weight: 400;
+            font-size: 1.1rem;
+        }
+        .registration-sidebar .sidebar-close {
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+        .registration-sidebar .sidebar-close:hover {
+            color: var(--text-primary);
+        }
+
+        .reg-sidebar-item {
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            background: var(--bg-body);
+            margin-bottom: 8px;
+            border-left: 4px solid var(--pastel-blue);
+            transition: var(--transition);
+        }
+        .reg-sidebar-item.active {
+            border-left-color: var(--pastel-red);
+            background: #f8ecec;
+        }
+        .reg-sidebar-item.upcoming {
+            border-left-color: var(--pastel-yellow);
+            background: #f8f4e8;
+        }
+        .reg-sidebar-item .s-name {
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        .reg-sidebar-item .s-meta {
+            font-size: 0.78rem;
+            color: var(--text-light);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 12px;
+            margin-top: 2px;
+        }
+        .reg-sidebar-item .s-link {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+        .reg-sidebar-item .s-link:hover {
+            text-decoration: underline;
+        }
+
+        /* ────────────── АДАПТИВ ────────────── */
+        @media (max-width: 800px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .modal-box {
+                padding: 20px 16px 18px;
+            }
+            .modal-box .field {
+                flex-wrap: wrap;
+                gap: 2px;
+            }
+            .modal-box .field .label {
+                min-width: 80px;
+            }
+            .day-cell {
+                min-height: 56px;
+                padding: 2px 4px 4px 4px;
+            }
+            .day-cell .day-number {
+                font-size: 0.7rem;
+            }
+            .olympiad-bar {
+                font-size: 0.6rem;
+                padding: 1px 4px;
+                min-height: 16px;
+            }
+            .week-header {
+                font-size: 0.6rem;
+            }
+            .app-header h1 {
+                font-size: 1.2rem;
+            }
+            .registration-sidebar {
+                width: 300px;
+            }
+        }
+
+        @media (max-width: 500px) {
+            body {
+                padding: 0 6px 20px;
+            }
+            .day-cell {
+                min-height: 44px;
+                padding: 1px 2px 2px 2px;
+            }
+            .day-cell .day-number {
+                font-size: 0.6rem;
+            }
+            .olympiad-bar {
+                font-size: 0.5rem;
+                padding: 1px 3px;
+                min-height: 14px;
+                border-radius: 3px;
+            }
+            .week-header span {
+                font-size: 0.5rem;
+            }
+            .month-label {
+                font-size: 1rem;
+            }
+            .btn {
+                font-size: 0.75rem;
+                padding: 5px 12px;
+            }
+            .registration-widget {
+                padding: 8px 10px;
+                gap: 6px;
+            }
+            .reg-tag {
+                font-size: 0.7rem;
+                padding: 3px 10px;
+            }
+        }
+
+        /* ────────────── ВСПОМОГАТЕЛЬНЫЕ ────────────── */
+        .mt-8 {
+            margin-top: 8px;
+        }
+        .mb-8 {
+            margin-bottom: 8px;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .text-muted {
+            color: var(--text-light);
+        }
+        .flex {
+            display: flex;
+        }
+        .flex-center {
+            align-items: center;
+            justify-content: center;
+        }
+        .gap-8 {
+            gap: 8px;
+        }
+        .gap-12 {
+            gap: 12px;
+        }
+        .wrap {
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script>
+        // ──────────────────────────────────────────────────────────────
+        // 1.  КОНФИГУРАЦИЯ FIREBASE (ЗАМЕНИТЕ НА СВОИ ДАННЫЕ)
+        // ──────────────────────────────────────────────────────────────
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+          apiKey: "AIzaSyBh9Bi6sHhONQDhjWzEBaxZ7SD-W3ik-TM",
+          authDomain: "olympiads-calendar.firebaseapp.com",
+          databaseURL: "https://olympiads-calendar-default-rtdb.europe-west1.firebasedatabase.app",
+          projectId: "olympiads-calendar",
+          storageBucket: "olympiads-calendar.firebasestorage.app",
+          messagingSenderId: "778345062107",
+          appId: "1:778345062107:web:4866fdf4759d1dcc7476fe",
+          measurementId: "G-3D1XV31JFX"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // ──────────────────────────────────────────────────────────────
+        // 2.  ПОМОЩНИКИ
+        // ──────────────────────────────────────────────────────────────
+        const ADMIN_UID = "USUg0QaBBNgtR6NmcIDj02zgqop1"; // ← укажите UID администратора, или оставьте null для авто-определения
+
+        function formatDate(d) {
+            if (!d) return '—';
+            if (d.toDate) d = d.toDate();
+            return d.toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit',
+                minute: '2-digit' });
+        }
+
+        function formatDateShort(d) {
+            if (!d) return '—';
+            if (d.toDate) d = d.toDate();
+            return d.toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+        }
+
+        function formatDateOnly(d) {
+            if (!d) return '—';
+            if (d.toDate) d = d.toDate();
+            return d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        }
+
+        function toDate(val) {
+            if (!val) return null;
+            if (val.toDate) return val.toDate();
+            if (val instanceof Date) return val;
+            return new Date(val);
+        }
+
+        function dateOnly(d) {
+            const dt = toDate(d);
+            if (!dt) return null;
+            return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+        }
+
+        function isSameDay(a, b) {
+            const da = dateOnly(a);
+            const db = dateOnly(b);
+            if (!da || !db) return false;
+            return da.getTime() === db.getTime();
+        }
+
+        function isBetween(date, start, end) {
+            const d = toDate(date);
+            const s = toDate(start);
+            const e = toDate(end);
+            if (!d || !s || !e) return false;
+            return d >= s && d <= e;
+        }
+
+        // ──────────────────────────────────────────────────────────────
+        // 3.  REACT ПРИЛОЖЕНИЕ
+        // ──────────────────────────────────────────────────────────────
+        const { useState, useEffect, useRef, useCallback, useMemo, useReducer } = React;
+
+        // ──── ХУК ДЛЯ FIRESTORE ────
+        function useOlympiads() {
+            const [items, setItems] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const [error, setError] = useState(null);
+
+            useEffect(() => {
+                const unsubscribe = db.collection('olympiads')
+                    .orderBy('startTime', 'asc')
+                    .onSnapshot((snap) => {
+                        try {
+                            const data = snap.docs.map(doc => ({
+                                id: doc.id,
+                                ...doc.data()
+                            }));
+                            setItems(data);
+                            setLoading(false);
+                            setError(null);
+                        } catch (err) {
+                            setError(err.message);
+                            setLoading(false);
+                        }
+                    }, (err) => {
+                        setError(err.message);
+                        setLoading(false);
+                    });
+                return () => unsubscribe();
+            }, []);
+
+            return { items, loading, error };
+        }
+
+        // ──── ХУК АУТЕНТИФИКАЦИИ ────
+        function useAuth() {
+            const [user, setUser] = useState(null);
+            const [loading, setLoading] = useState(true);
+
+            useEffect(() => {
+                const unsub = auth.onAuthStateChanged(u => {
+                    setUser(u);
+                    setLoading(false);
+                });
+                return () => unsub();
+            }, []);
+
+            const login = (email, password) => auth.signInWithEmailAndPassword(email, password);
+            const logout = () => auth.signOut();
+
+            return { user, loading, login, logout };
+        }
+
+        // ──── ГЕНЕРАЦИЯ КАЛЕНДАРЯ ────
+        function buildCalendar(startDate, endDate) {
+            const start = dateOnly(startDate);
+            const end = dateOnly(endDate);
+            if (!start || !end) return [];
+
+            const months = [];
+            let cursor = new Date(start);
+
+            while (cursor <= end) {
+                const year = cursor.getFullYear();
+                const month = cursor.getMonth();
+                const firstDay = new Date(year, month, 1);
+                const lastDay = new Date(year, month + 1, 0);
+                const monthStart = new Date(Math.max(firstDay.getTime(), start.getTime()));
+                const monthEnd = new Date(Math.min(lastDay.getTime(), end.getTime()));
+
+                // Определяем первый день недели (понедельник)
+                let weekStart = new Date(monthStart);
+                const dow = weekStart.getDay(); // 0=воскр
+                const diff = (dow === 0 ? 6 : dow - 1);
+                weekStart.setDate(weekStart.getDate() - diff);
+
+                const weeks = [];
+                let weekCursor = new Date(weekStart);
+
+                while (weekCursor <= monthEnd) {
+                    const week = [];
+                    for (let i = 0; i < 7; i++) {
+                        const d = new Date(weekCursor);
+                        week.push(d);
+                        weekCursor.setDate(weekCursor.getDate() + 1);
+                    }
+                    weeks.push(week);
+                }
+
+                months.push({
+                    year,
+                    month,
+                    label: `${['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'][month]} ${year}`,
+                    weeks,
+                    start: monthStart,
+                    end: monthEnd,
+                });
+
+                cursor = new Date(year, month + 1, 1);
+            }
+
+            return months;
+        }
+
+        // ──── ПОЛУЧЕНИЕ ПОЛОС ДЛЯ ДНЯ ────
+        function getBarsForDay(olympiads, dayDate) {
+            const day = dateOnly(dayDate);
+            if (!day) return [];
+            const result = [];
+            for (const o of olympiads) {
+                const start = dateOnly(o.startTime);
+                const end = dateOnly(o.endTime);
+                if (!start || !end) continue;
+                if (day >= start && day <= end) {
+                    result.push(o);
+                }
+            }
+            // сортировка по длительности (длинные сверху)
+            result.sort((a, b) => {
+                const da = dateOnly(a.endTime) - dateOnly(a.startTime);
+                const db = dateOnly(b.endTime) - dateOnly(b.startTime);
+                return db - da;
+            });
+            return result;
+        }
+
+        // ──── ПРОВЕРКА РЕГИСТРАЦИЙ ────
+        function getRegistrationStatus(olympiad) {
+            if (!olympiad.registrationRequired) return null;
+            const now = new Date();
+            const start = toDate(olympiad.registrationStart);
+            const end = toDate(olympiad.registrationEnd);
+            if (!start || !end) return null;
+            if (now >= start && now <= end) return 'active';
+            if (now < start) {
+                const diff = (start - now) / (1000 * 60 * 60 * 24);
+                if (diff < 3) return 'upcoming';
+            }
+            return null;
+        }
+
+        // ──────────────────────────────────────────────────────────────
+        // 4.  КОМПОНЕНТЫ
+        // ──────────────────────────────────────────────────────────────
+
+        // ──── SPINNER ────
+        function Spinner({ text }) {
+            return React.createElement('div', { className: 'loading-overlay' },
+                React.createElement('div', { className: 'spinner' }),
+                text && React.createElement('span', null, text)
+            );
+        }
+
+        // ──── МОДАЛЬНОЕ ОКНО ────
+        function Modal({ olympiad, onClose, onEdit, isAdmin }) {
+            if (!olympiad) return null;
+
+            const levelLabels = {
+                'Первого уровня': 'I уровня',
+                'Второго уровня': 'II уровня',
+                'Третьего уровня': 'III уровня'
+            };
+
+            return React.createElement('div', { className: 'modal-overlay', onClick: (e) => { if (e.target === e.currentTarget)
+                    onClose(); } },
+                React.createElement('div', { className: 'modal-box' },
+                    React.createElement('button', { className: 'modal-close', onClick: onClose }, '×'),
+                    React.createElement('h2', null, olympiad.name || 'Без названия'),
+                    React.createElement('div', { className: 'field' },
+                        React.createElement('span', { className: 'label' }, 'Уровень'),
+                        React.createElement('span', { className: 'value' }, levelLabels[olympiad.level] || olympiad
+                            .level || '—')
+                    ),
+                    React.createElement('div', { className: 'field' },
+                        React.createElement('span', { className: 'label' }, 'Направление'),
+                        React.createElement('span', { className: 'value' }, olympiad.direction || '—')
+                    ),
+                    React.createElement('div', { className: 'field' },
+                        React.createElement('span', { className: 'label' }, 'Время'),
+                        React.createElement('span', { className: 'value' },
+                            `${formatDate(olympiad.startTime)} — ${formatDate(olympiad.endTime)}`
+                        )
+                    ),
+                    olympiad.type && React.createElement('div', { className: 'field' },
+                        React.createElement('span', { className: 'label' }, 'Формат'),
+                        React.createElement('span', { className: 'value' }, olympiad.type)
+                    ),
+                    olympiad.address && React.createElement('div', { className: 'field' },
+                        React.createElement('span', { className: 'label' }, 'Адрес / Ссылка'),
+                        React.createElement('span', { className: 'value' }, olympiad.address)
+                    ),
+                    olympiad.whatToBring && React.createElement('div', { className: 'field' },
+                        React.createElement('span', { className: 'label' }, 'Что взять'),
+                        React.createElement('span', { className: 'value' }, olympiad.whatToBring)
+                    ),
+                    olympiad.additionalInfo && React.createElement('div', { className: 'field' },
+                        React.createElement('span', { className: 'label' }, 'Доп. информация'),
+                        React.createElement('span', { className: 'value' }, olympiad.additionalInfo)
+                    ),
+                    olympiad.registrationRequired && React.createElement('div', { className: 'field' },
+                        React.createElement('span', { className: 'label' }, 'Регистрация'),
+                        React.createElement('span', { className: 'value' },
+                            `${formatDate(olympiad.registrationStart)} — ${formatDate(olympiad.registrationEnd)}`,
+                            olympiad.registrationUrl && React.createElement('a', { href: olympiad.registrationUrl,
+                                target: '_blank', rel: 'noopener', style: { marginLeft: 8 } }, '🔗 Перейти')
+                        )
+                    ),
+                    React.createElement('div', { className: 'modal-actions' },
+                        React.createElement('button', { className: 'btn btn-outline btn-sm', onClick: onClose },
+                            'Закрыть'
+                        ),
+                        isAdmin && React.createElement('button', { className: 'btn btn-primary btn-sm',
+                                onClick: () => { onClose();
+                                    onEdit(olympiad); } },
+                            '✎ Редактировать'
+                        )
+                    )
+                )
+            );
+        }
+
+        // ──── ФОРМА ДОБАВЛЕНИЯ/РЕДАКТИРОВАНИЯ ────
+        function OlympiadForm({ olympiad, onSave, onCancel }) {
+            const empty = {
+                name: '',
+                level: 'Первого уровня',
+                direction: '',
+                startTime: '',
+                endTime: '',
+                type: '',
+                address: '',
+                whatToBring: '',
+                additionalInfo: '',
+                registrationRequired: false,
+                registrationStart: '',
+                registrationEnd: '',
+                registrationUrl: '',
+            };
+
+            const [form, setForm] = useState(() => {
+                if (olympiad) {
+                    const f = { ...olympiad };
+                    // Преобразуем timestamp в строку для input
+                    const toInput = (val) => {
+                        if (!val) return '';
+                        const d = toDate(val);
+                        if (!d) return '';
+                        return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+                    };
+                    f.startTime = toInput(f.startTime);
+                    f.endTime = toInput(f.endTime);
+                    f.registrationStart = toInput(f.registrationStart);
+                    f.registrationEnd = toInput(f.registrationEnd);
+                    return f;
+                }
+                return { ...empty };
+            });
+
+            const [saving, setSaving] = useState(false);
+
+            const handleChange = (key, val) => {
+                setForm(prev => ({ ...prev, [key]: val }));
+            };
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                // Валидация
+                if (!form.name.trim()) { alert('Введите название олимпиады'); return; }
+                if (!form.level) { alert('Выберите уровень'); return; }
+                if (!form.direction.trim()) { alert('Введите направление'); return; }
+                if (!form.startTime) { alert('Укажите время начала'); return; }
+                if (!form.endTime) { alert('Укажите время окончания'); return; }
+
+                const start = new Date(form.startTime);
+                const end = new Date(form.endTime);
+                if (end < start) { alert('Время окончания не может быть раньше начала'); return; }
+
+                if (form.registrationRequired) {
+                    if (!form.registrationStart || !form.registrationEnd) {
+                        alert('Укажите период регистрации');
+                        return;
+                    }
+                    const rs = new Date(form.registrationStart);
+                    const re = new Date(form.registrationEnd);
+                    if (re < rs) { alert('Окончание регистрации не может быть раньше начала'); return; }
+                    if (!form.registrationUrl.trim()) { alert('Укажите ссылку для регистрации'); return; }
+                }
+
+                setSaving(true);
+                try {
+                    const data = {
+                        name: form.name.trim(),
+                        level: form.level,
+                        direction: form.direction.trim(),
+                        startTime: firebase.firestore.Timestamp.fromDate(new Date(form.startTime)),
+                        endTime: firebase.firestore.Timestamp.fromDate(new Date(form.endTime)),
+                        type: form.type || null,
+                        address: form.address?.trim() || null,
+                        whatToBring: form.whatToBring?.trim() || null,
+                        additionalInfo: form.additionalInfo?.trim() || null,
+                        registrationRequired: !!form.registrationRequired,
+                        registrationStart: form.registrationRequired ? firebase.firestore.Timestamp.fromDate(new Date(
+                            form.registrationStart)) : null,
+                        registrationEnd: form.registrationRequired ? firebase.firestore.Timestamp.fromDate(new Date(
+                            form.registrationEnd)) : null,
+                        registrationUrl: form.registrationRequired ? form.registrationUrl.trim() : null,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    };
+
+                    if (olympiad?.id) {
+                        await db.collection('olympiads').doc(olympiad.id).update(data);
+                    } else {
+                        data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+                        await db.collection('olympiads').add(data);
+                    }
+                    onSave();
+                } catch (err) {
+                    alert('Ошибка сохранения: ' + err.message);
+                } finally {
+                    setSaving(false);
+                }
+            };
+
+            const levelOptions = ['Первого уровня', 'Второго уровня', 'Третьего уровня'];
+            const typeOptions = ['', 'Очный', 'Онлайн', 'Смешанный'];
+
+            return React.createElement('form', { onSubmit: handleSubmit, style: { padding: '4px 0' } },
+                React.createElement('div', { className: 'form-group' },
+                    React.createElement('label', null, 'Название ', React.createElement('span', { className: 'required' },
+                        '*')),
+                    React.createElement('input', {
+                        type: 'text',
+                        value: form.name,
+                        onChange: e => handleChange('name', e.target.value),
+                        placeholder: 'Введите название олимпиады',
+                        required: true,
+                        disabled: saving
+                    })
+                ),
+                React.createElement('div', { className: 'form-row' },
+                    React.createElement('div', { className: 'form-group' },
+                        React.createElement('label', null, 'Уровень ', React.createElement('span', { className: 'required' },
+                            '*')),
+                        React.createElement('select', {
+                            value: form.level,
+                            onChange: e => handleChange('level', e.target.value),
+                            disabled: saving
+                        },
+                            levelOptions.map(l => React.createElement('option', { key: l, value: l }, l))
+                        )
+                    ),
+                    React.createElement('div', { className: 'form-group' },
+                        React.createElement('label', null, 'Направление ', React.createElement('span', { className: 'required' },
+                            '*')),
+                        React.createElement('input', {
+                            type: 'text',
+                            value: form.direction,
+                            onChange: e => handleChange('direction', e.target.value),
+                            placeholder: 'Математика, Информатика...',
+                            required: true,
+                            disabled: saving
+                        })
+                    )
+                ),
+                React.createElement('div', { className: 'form-row' },
+                    React.createElement('div', { className: 'form-group' },
+                        React.createElement('label', null, 'Начало ', React.createElement('span', { className: 'required' },
+                            '*')),
+                        React.createElement('input', {
+                            type: 'datetime-local',
+                            value: form.startTime,
+                            onChange: e => handleChange('startTime', e.target.value),
+                            required: true,
+                            disabled: saving
+                        })
+                    ),
+                    React.createElement('div', { className: 'form-group' },
+                        React.createElement('label', null, 'Окончание ', React.createElement('span', { className: 'required' },
+                            '*')),
+                        React.createElement('input', {
+                            type: 'datetime-local',
+                            value: form.endTime,
+                            onChange: e => handleChange('endTime', e.target.value),
+                            required: true,
+                            disabled: saving
+                        })
+                    )
+                ),
+                React.createElement('div', { className: 'form-row' },
+                    React.createElement('div', { className: 'form-group' },
+                        React.createElement('label', null, 'Тип проведения'),
+                        React.createElement('select', {
+                            value: form.type,
+                            onChange: e => handleChange('type', e.target.value),
+                            disabled: saving
+                        },
+                            typeOptions.map(t => React.createElement('option', { key: t, value: t }, t || '—'))
+                        )
+                    ),
+                    React.createElement('div', { className: 'form-group' },
+                        React.createElement('label', null, 'Адрес / Ссылка'),
+                        React.createElement('input', {
+                            type: 'text',
+                            value: form.address || '',
+                            onChange: e => handleChange('address', e.target.value),
+                            placeholder: 'г. Москва, ул. ... или https://...',
+                            disabled: saving
+                        })
+                    )
+                ),
+                React.createElement('div', { className: 'form-group' },
+                    React.createElement('label', null, 'Что взять с собой'),
+                    React.createElement('input', {
+                        type: 'text',
+                        value: form.whatToBring || '',
+                        onChange: e => handleChange('whatToBring', e.target.value),
+                        placeholder: 'Паспорт, ручка, ...',
+                        disabled: saving
+                    })
+                ),
+                React.createElement('div', { className: 'form-group' },
+                    React.createElement('label', null, 'Дополнительная информация'),
+                    React.createElement('textarea', {
+                        value: form.additionalInfo || '',
+                        onChange: e => handleChange('additionalInfo', e.target.value),
+                        placeholder: 'Любые важные детали...',
+                        rows: 3,
+                        disabled: saving
+                    })
+                ),
+                React.createElement('div', { className: 'form-group' },
+                    React.createElement('div', { className: 'checkbox-group' },
+                        React.createElement('input', {
+                            type: 'checkbox',
+                            id: 'regRequired',
+                            checked: form.registrationRequired,
+                            onChange: e => handleChange('registrationRequired', e.target.checked),
+                            disabled: saving
+                        }),
+                        React.createElement('label', { htmlFor: 'regRequired' }, 'Требуется регистрация')
+                    )
+                ),
+                form.registrationRequired && React.createElement(React.Fragment, null,
+                    React.createElement('div', { className: 'form-row' },
+                        React.createElement('div', { className: 'form-group' },
+                            React.createElement('label', null, 'Начало регистрации'),
+                            React.createElement('input', {
+                                type: 'datetime-local',
+                                value: form.registrationStart,
+                                onChange: e => handleChange('registrationStart', e.target.value),
+                                disabled: saving
+                            })
+                        ),
+                        React.createElement('div', { className: 'form-group' },
+                            React.createElement('label', null, 'Окончание регистрации'),
+                            React.createElement('input', {
+                                type: 'datetime-local',
+                                value: form.registrationEnd,
+                                onChange: e => handleChange('registrationEnd', e.target.value),
+                                disabled: saving
+                            })
+                        )
+                    ),
+                    React.createElement('div', { className: 'form-group' },
+                        React.createElement('label', null, 'Ссылка на регистрацию'),
+                        React.createElement('input', {
+                            type: 'url',
+                            value: form.registrationUrl || '',
+                            onChange: e => handleChange('registrationUrl', e.target.value),
+                            placeholder: 'https://...',
+                            disabled: saving
+                        })
+                    )
+                ),
+                React.createElement('div', { className: 'form-actions' },
+                    React.createElement('button', { type: 'submit', className: 'btn btn-success', disabled: saving },
+                        saving ? 'Сохранение...' : olympiad ? 'Сохранить' : 'Добавить'
+                    ),
+                    React.createElement('button', { type: 'button', className: 'btn btn-outline', onClick: onCancel,
+                        disabled: saving }, 'Отмена')
+                )
+            );
+        }
+
+        // ──── ПОЛОСА ОЛИМПИАДЫ ────
+        function OlympiadBar({ olympiad, isFirst, isLast, onRightClick, onEdit }) {
+            const levelClass = olympiad.level === 'Первого уровня' ? 'level-1' :
+                olympiad.level === 'Второго уровня' ? 'level-2' :
+                olympiad.level === 'Третьего уровня' ? 'level-3' : '';
+
+            let cutClass = '';
+            if (!isFirst && !isLast) cutClass = 'bar-cut-both';
+            else if (!isFirst) cutClass = 'bar-cut-left';
+            else if (!isLast) cutClass = 'bar-cut-right';
+
+            const handleContext = (e) => {
+                e.preventDefault();
+                if (onRightClick) onRightClick(olympiad);
+            };
+
+            const handleDouble = (e) => {
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    if (onEdit) onEdit(olympiad);
+                }
+            };
+
+            const handleClick = (e) => {
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    if (onEdit) onEdit(olympiad);
+                }
+            };
+
+            return React.createElement('div', {
+                className: `olympiad-bar ${levelClass} ${cutClass}`,
+                onContextMenu: handleContext,
+                onDoubleClick: handleDouble,
+                onClick: handleClick,
+                title: olympiad.name || 'Без названия'
+            },
+                olympiad.name || 'Без названия',
+                React.createElement('div', { className: 'bar-tooltip' },
+                    React.createElement('strong', null, olympiad.name || 'Без названия'),
+                    React.createElement('br', null),
+                    `${olympiad.level || ''} · ${olympiad.direction || ''}`,
+                    olympiad.type && React.createElement(React.Fragment, null, React.createElement('br', null),
+                        `Формат: ${olympiad.type}`)
+                )
+            );
+        }
+
+        // ──── ЯЧЕЙКА ДНЯ ────
+        function DayCell({ date, olympiads, isToday, isOtherMonth, onBarRightClick, onBarEdit }) {
+            const dayBars = getBarsForDay(olympiads, date);
+            const dayNum = date.getDate();
+
+            // Группировка полос по "связности" через неделю
+            // Для каждой полосы определяем, является ли она первой/последней в этой ячейке
+            // (упрощённо: если полоса начинается в этот день — isFirst, если заканчивается — isLast)
+
+            const bars = dayBars.map(o => {
+                const start = dateOnly(o.startTime);
+                const end = dateOnly(o.endTime);
+                const d = dateOnly(date);
+                return {
+                    ...o,
+                    isFirst: d && start && d.getTime() === start.getTime(),
+                    isLast: d && end && d.getTime() === end.getTime(),
+                };
+            });
+
+            // Если несколько полос в один день, они располагаются друг под другом
+            return React.createElement('div', {
+                className: `day-cell ${isOtherMonth ? 'other-month' : ''} ${isToday ? 'today' : ''}`
+            },
+                React.createElement('span', { className: 'day-number' }, dayNum),
+                React.createElement('div', { className: 'day-bars' },
+                    bars.map((o, idx) => React.createElement(OlympiadBar, {
+                        key: o.id + '-' + idx,
+                        olympiad: o,
+                        isFirst: o.isFirst,
+                        isLast: o.isLast,
+                        onRightClick: onBarRightClick,
+                        onEdit: onBarEdit,
+                    }))
+                )
+            );
+        }
+
+        // ──── НЕДЕЛЯ ────
+        function WeekRow({ week, olympiads, today, onBarRightClick, onBarEdit }) {
+            return React.createElement('div', { className: 'week-row' },
+                week.map((day, idx) => {
+                    const isToday = today && isSameDay(day, today);
+                    const isOtherMonth = false; // определяем в месяце
+                    return React.createElement(DayCell, {
+                        key: idx,
+                        date: day,
+                        olympiads,
+                        isToday,
+                        isOtherMonth,
+                        onBarRightClick,
+                        onBarEdit,
+                    });
+                })
+            );
+        }
+
+        // ──── МЕСЯЦ ────
+        function MonthBlock({ month, olympiads, today, onBarRightClick, onBarEdit }) {
+            const weekDays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+
+            // Проверяем, принадлежит ли день этому месяцу
+            const isInMonth = (d) => d.getMonth() === month.month && d.getFullYear() === month.year;
+
+            return React.createElement('div', { className: 'month-block' },
+                React.createElement('div', { className: 'month-label' }, month.label),
+                React.createElement('div', { className: 'week-header' },
+                    weekDays.map(d => React.createElement('span', { key: d }, d))
+                ),
+                month.weeks.map((week, wi) => {
+                    // Проверяем, есть ли в этой неделе дни из этого месяца
+                    const hasMonthDays = week.some(d => isInMonth(d));
+                    if (!hasMonthDays) return null;
+                    return React.createElement(WeekRow, {
+                        key: wi,
+                        week: week.map(d => {
+                            // Для корректной работы isOtherMonth передаём флаг
+                            return d;
+                        }),
+                        olympiads,
+                        today,
+                        onBarRightClick,
+                        onBarEdit,
+                        // передаём month для определения other-month
+                        _isInMonth: isInMonth,
+                    });
+                })
+            );
+        }
+
+        // ──── КАЛЕНДАРЬ ────
+        function Calendar({ olympiads, onBarRightClick, onBarEdit }) {
+            const [today] = useState(new Date());
+            const scrollRef = useRef(null);
+            const [hasScrolled, setHasScrolled] = useState(false);
+
+            const startDate = new Date(2026, 7, 1); // 1 августа 2026
+            const endDate = new Date(2027, 7, 1); // 1 августа 2027
+            const months = buildCalendar(startDate, endDate);
+
+            // Прокрутка к текущей неделе при загрузке
+            useEffect(() => {
+                if (!scrollRef.current || hasScrolled) return;
+                // Ищем неделю, содержащую сегодня
+                const todayStr = dateOnly(today)?.toISOString().slice(0, 10);
+                if (!todayStr) return;
+
+                // Ищем в месяцах
+                let found = false;
+                for (let mi = 0; mi < months.length; mi++) {
+                    const m = months[mi];
+                    for (let wi = 0; wi < m.weeks.length; wi++) {
+                        const week = m.weeks[wi];
+                        for (const d of week) {
+                            if (dateOnly(d)?.toISOString().slice(0, 10) === todayStr) {
+                                // Нашли неделю, прокручиваем к ней
+                                const target = scrollRef.current.querySelector(
+                                    `.month-block:nth-child(${mi+1}) .week-row:nth-child(${wi+2})`
+                                );
+                                if (target) {
+                                    setTimeout(() => {
+                                        target.scrollIntoView({ block: 'start', behavior: 'smooth' });
+                                    }, 100);
+                                }
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (found) break;
+                    }
+                    if (found) break;
+                }
+                setHasScrolled(true);
+            }, [months, today, hasScrolled]);
+
+            // Не показываем если нет данных
+            if (months.length === 0) {
+                return React.createElement('div', { className: 'text-center text-muted', style: { padding: '40px 0' } },
+                    'Нет данных для отображения'
+                );
+            }
+
+            return React.createElement('div', { className: 'calendar-wrapper' },
+                React.createElement('div', { className: 'calendar-scroll', ref: scrollRef },
+                    months.map((m, idx) => React.createElement(MonthBlock, {
+                        key: idx,
+                        month: m,
+                        olympiads,
+                        today,
+                        onBarRightClick,
+                        onBarEdit,
+                    }))
+                )
+            );
+        }
+
+        // ──── ВИДЖЕТ РЕГИСТРАЦИЙ ────
+        function RegistrationWidget({ olympiads }) {
+            const now = new Date();
+            const active = [];
+            const upcoming = [];
+
+            for (const o of olympiads) {
+                if (!o.registrationRequired) continue;
+                const start = toDate(o.registrationStart);
+                const end = toDate(o.registrationEnd);
+                if (!start || !end) continue;
+                if (now >= start && now <= end) {
+                    active.push(o);
+                } else if (now < start) {
+                    const diff = (start - now) / (1000 * 60 * 60 * 24);
+                    if (diff < 3) upcoming.push(o);
+                }
+            }
+
+            if (active.length === 0 && upcoming.length === 0) {
+                return React.createElement('div', { className: 'registration-widget' },
+                    React.createElement('span', { className: 'empty' }, '📋 Нет активных или предстоящих регистраций')
+                );
+            }
+
+            const items = [...active.map(o => ({ ...o, _status: 'active' })), ...upcoming.map(o => ({ ...o,
+                _status: 'upcoming' }))];
+
+            return React.createElement('div', { className: 'registration-widget' },
+                items.map(o => {
+                    const status = o._status;
+                    const label = status === 'active' ? '🔴 Регистрация открыта' : '🟡 Скоро открытие';
+                    return React.createElement('div', { key: o.id, className: `reg-tag ${status}` },
+                        React.createElement('span', { className: 'reg-name' }, o.name || 'Без названия'),
+                        React.createElement('span', { className: 'reg-badge' }, label),
+                        o.registrationUrl && React.createElement('a', {
+                            href: o.registrationUrl,
+                            target: '_blank',
+                            rel: 'noopener',
+                            className: 'reg-link'
+                        }, 'Перейти →')
+                    );
+                })
+            );
+        }
+
+        // ──── САЙДБАР РЕГИСТРАЦИЙ ────
+        function RegistrationSidebar({ olympiads, isOpen, onClose }) {
+            const now = new Date();
+            const items = [];
+
+            for (const o of olympiads) {
+                if (!o.registrationRequired) continue;
+                const start = toDate(o.registrationStart);
+                const end = toDate(o.registrationEnd);
+                if (!start || !end) continue;
+                if (now <= end) { // все будущие и активные
+                    const status = (now >= start && now <= end) ? 'active' : 'upcoming';
+                    items.push({ ...o, _status: status, _start: start, _end: end });
+                }
+            }
+
+            items.sort((a, b) => a._start - b._start);
+
+            return React.createElement('div', { className: `registration-sidebar ${isOpen ? 'open' : ''}` },
+                React.createElement('div', { className: 'sidebar-header' },
+                    React.createElement('h3', null, '📋 Регистрации'),
+                    React.createElement('button', { className: 'sidebar-close', onClick: onClose }, '✕')
+                ),
+                items.length === 0 ?
+                React.createElement('div', { className: 'text-muted', style: { padding: '16px 0' } },
+                    'Нет олимпиад с регистрацией'
+                ) :
+                items.map(o => {
+                    const statusLabel = o._status === 'active' ? '🔴 Открыта' : '🟡 Скоро';
+                    return React.createElement('div', { key: o.id, className: `reg-sidebar-item ${o._status}` },
+                        React.createElement('div', { className: 's-name' }, o.name || 'Без названия'),
+                        React.createElement('div', { className: 's-meta' },
+                            React.createElement('span', null, statusLabel),
+                            React.createElement('span', null,
+                                `${formatDate(o.registrationStart)} — ${formatDate(o.registrationEnd)}`
+                            ),
+                            o.registrationUrl && React.createElement('a', {
+                                href: o.registrationUrl,
+                                target: '_blank',
+                                rel: 'noopener',
+                                className: 's-link'
+                            }, '🔗 Ссылка')
+                        )
+                    );
+                })
+            );
+        }
+
+        // ──── ГЛАВНЫЙ КОМПОНЕНТ ────
+        function App() {
+            const { items: olympiads, loading, error } = useOlympiads();
+            const { user, loading: authLoading, login, logout } = useAuth();
+
+            const [selectedOlympiad, setSelectedOlympiad] = useState(null);
+            const [editingOlympiad, setEditingOlympiad] = useState(null);
+            const [showForm, setShowForm] = useState(false);
+            const [sidebarOpen, setSidebarOpen] = useState(false);
+
+            const isAdmin = user && (ADMIN_UID ? user.uid === ADMIN_UID : true);
+
+            const handleBarRightClick = (olympiad) => {
+                setSelectedOlympiad(olympiad);
+            };
+
+            const handleBarEdit = (olympiad) => {
+                if (!isAdmin) return;
+                setEditingOlympiad(olympiad);
+                setShowForm(true);
+            };
+
+            const handleAdd = () => {
+                if (!isAdmin) return;
+                setEditingOlympiad(null);
+                setShowForm(true);
+            };
+
+            const handleFormSave = () => {
+                setShowForm(false);
+                setEditingOlympiad(null);
+            };
+
+            const handleFormCancel = () => {
+                setShowForm(false);
+                setEditingOlympiad(null);
+            };
+
+            const handleDelete = async (id) => {
+                if (!isAdmin || !id) return;
+                if (!window.confirm('Удалить эту олимпиаду?')) return;
+                try {
+                    await db.collection('olympiads').doc(id).delete();
+                    setSelectedOlympiad(null);
+                } catch (err) {
+                    alert('Ошибка удаления: ' + err.message);
+                }
+            };
+
+            const handleLogin = async () => {
+                const email = prompt('Email:');
+                if (!email) return;
+                const password = prompt('Пароль:');
+                if (!password) return;
+                try {
+                    await login(email, password);
+                } catch (err) {
+                    alert('Ошибка входа: ' + err.message);
+                }
+            };
+
+            const handleLogout = () => logout();
+
+            // ──── РЕНДЕР ────
+            if (authLoading || loading) {
+                return React.createElement('div', { className: 'app' },
+                    React.createElement('div', { className: 'app-header' },
+                        React.createElement('h1', null, '📅 Олимпиады 2026–2027', React.createElement('small', null,
+                            'учебный год'))
+                    ),
+                    React.createElement(Spinner, { text: 'Загрузка...' })
+                );
+            }
+
+            if (error) {
+                return React.createElement('div', { className: 'app' },
+                    React.createElement('div', { className: 'app-header' },
+                        React.createElement('h1', null, '📅 Олимпиады 2026–2027')
+                    ),
+                    React.createElement('div', { style: { padding: 40, textAlign: 'center', color: '#8a5a5a' } },
+                        '⚠️ Ошибка загрузки данных: ', error,
+                        React.createElement('br', null),
+                        React.createElement('button', { className: 'btn btn-outline mt-8', onClick: () => window
+                                .location.reload() }, 'Обновить')
+                    )
+                );
+            }
+
+            return React.createElement('div', { className: 'app' },
+                // Шапка
+                React.createElement('div', { className: 'app-header' },
+                    React.createElement('h1', null, '📅 Олимпиады 2026–2027', React.createElement('small', null,
+                            'учебный год')),
+                    React.createElement('div', { className: 'header-actions' },
+                        isAdmin && React.createElement('button', { className: 'btn btn-primary', onClick: handleAdd },
+                            '➕ Добавить'
+                        ),
+                        !user ?
+                        React.createElement('button', { className: 'btn btn-outline', onClick: handleLogin },
+                            '🔑 Вход для админа'
+                        ) :
+                        React.createElement(React.Fragment, null,
+                            React.createElement('span', { style: { fontSize: '0.85rem', color: 'var(--text-light)' } },
+                                '👤 ' + (user.email || 'admin')
+                            ),
+                            React.createElement('button', { className: 'btn btn-outline btn-sm', onClick: handleLogout },
+                                'Выйти'
+                            )
+                        )
+                    )
+                ),
+
+                // Виджет регистраций
+                React.createElement(RegistrationWidget, { olympiads }),
+
+                // Календарь
+                React.createElement(Calendar, {
+                    olympiads,
+                    onBarRightClick: handleBarRightClick,
+                    onBarEdit: handleBarEdit,
+                }),
+
+                // Кнопка-триггер сайдбара
+                React.createElement('button', {
+                    className: 'sidebar-toggle',
+                    onClick: () => setSidebarOpen(true),
+                    title: 'Список регистраций'
+                },
+                    '📋',
+                    React.createElement('span', { className: 'badge' },
+                        olympiads.filter(o => o.registrationRequired && toDate(o.registrationEnd) >= new Date()).length
+                    )
+                ),
+
+                // Сайдбар
+                React.createElement(RegistrationSidebar, {
+                    olympiads,
+                    isOpen: sidebarOpen,
+                    onClose: () => setSidebarOpen(false),
+                }),
+
+                // Модальное окно просмотра
+                selectedOlympiad && React.createElement(Modal, {
+                    olympiad: selectedOlympiad,
+                    onClose: () => setSelectedOlympiad(null),
+                    onEdit: (o) => {
+                        if (isAdmin) {
+                            setEditingOlympiad(o);
+                            setShowForm(true);
+                            setSelectedOlympiad(null);
+                        }
+                    },
+                    isAdmin,
+                }),
+
+                // Форма добавления/редактирования
+                showForm && React.createElement('div', { className: 'modal-overlay', onClick: (e) => { if (e.target === e
+                            .currentTarget) handleFormCancel(); } },
+                    React.createElement('div', { className: 'modal-box', style: { maxWidth: 720 } },
+                        React.createElement('button', { className: 'modal-close', onClick: handleFormCancel }, '×'),
+                        React.createElement('h2', null, editingOlympiad ? '✎ Редактирование' : '➕ Новая олимпиада'),
+                        React.createElement(OlympiadForm, {
+                            olympiad: editingOlympiad,
+                            onSave: handleFormSave,
+                            onCancel: handleFormCancel,
+                        }),
+                        editingOlympiad && React.createElement('div', { style: { marginTop: 12, borderTop: '1px solid var(--border-light)',
+                                paddingTop: 12 } },
+                            React.createElement('button', {
+                                className: 'btn btn-danger btn-sm',
+                                onClick: () => {
+                                    if (editingOlympiad.id) {
+                                        handleDelete(editingOlympiad.id);
+                                        handleFormCancel();
+                                    }
+                                }
+                            }, '🗑 Удалить')
+                        )
+                    )
+                )
+            );
+        }
+
+        // ──────────────────────────────────────────────────────────────
+        // 5.  РЕНДЕР
+        // ──────────────────────────────────────────────────────────────
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(React.createElement(App));
+    </script>
+
+</body>
+</html>
