@@ -41,7 +41,6 @@
             --radius-sm: 6px;
             --transition: 0.2s ease;
 
-            /* пастельная палитра */
             --pastel-blue: #dce8f0;
             --pastel-green: #dceee4;
             --pastel-pink: #f5e0e8;
@@ -51,11 +50,82 @@
             --pastel-yellow: #f5f0d8;
             --pastel-red: #f5d8d8;
             --pastel-coral: #f5e0d8;
-
-            /* Цвета полос по уровням */
             --level-1: #c8d8e8;
             --level-2: #d4e4d4;
             --level-3: #f0e0d0;
+        }
+
+        /* ─── ТЁМНАЯ ТЕМА ─── */
+        [data-theme="dark"] {
+            --bg-body: #1a1a1a;
+            --bg-card: #2c2c2c;
+            --bg-header: #2a2a2a;
+            --text-primary: #e8e0d8;
+            --text-secondary: #b0a8a0;
+            --text-light: #888080;
+            --border-light: #404040;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 6px 24px rgba(0, 0, 0, 0.5);
+            --pastel-blue: #3a4a5a;
+            --pastel-green: #3a5a4a;
+            --pastel-red: #5a3a3a;
+            --pastel-yellow: #5a4a2a;
+            --level-1: #3a4a5a;
+            --level-2: #3a5a4a;
+            --level-3: #5a4a3a;
+            --btn-primary-bg: #4a6a7a;
+            --btn-primary-color: #e8e0d8;
+            --btn-success-bg: #4a7a5a;
+            --btn-success-color: #e8e0d8;
+            --btn-danger-bg: #7a4a4a;
+            --btn-danger-color: #e8e0d8;
+            --btn-warning-bg: #7a6a3a;
+            --btn-warning-color: #e8e0d8;
+        }
+
+        /* ─── БАНАННАЯ ТЕМА (пасхалка) ─── */
+        .banana-theme {
+            --bg-body: #fff8e0 !important;
+            --bg-card: #fff5d0 !important;
+            --bg-header: #fff0c0 !important;
+            --text-primary: #8a7a30 !important;
+            --text-secondary: #b09040 !important;
+            --text-light: #c0a050 !important;
+            --border-light: #e8d090 !important;
+            --shadow-sm: 0 2px 8px rgba(180, 140, 40, 0.15) !important;
+            --shadow-md: 0 6px 24px rgba(180, 140, 40, 0.2) !important;
+            --pastel-blue: #f5e8b0 !important;
+            --pastel-green: #f0e0a0 !important;
+            --pastel-red: #f5d8a0 !important;
+            --pastel-yellow: #f5f0b0 !important;
+            --level-1: #f5e8b0 !important;
+            --level-2: #f0e0a0 !important;
+            --level-3: #f5d8a0 !important;
+            --btn-primary-bg: #f5e8b0 !important;
+            --btn-primary-color: #7a6a30 !important;
+            --btn-success-bg: #f0e0a0 !important;
+            --btn-success-color: #7a6a30 !important;
+            --btn-danger-bg: #f5d8a0 !important;
+            --btn-danger-color: #7a6a30 !important;
+            --btn-warning-bg: #f5f0b0 !important;
+            --btn-warning-color: #7a6a30 !important;
+        }
+        .banana-theme .olympiad-bar {
+            border-color: #e8d080 !important;
+        }
+        .banana-theme .olympiad-bar .bar-tooltip {
+            background: #f5e8b0 !important;
+            color: #7a6a30 !important;
+        }
+        .banana-theme .sidebar-toggle .badge {
+            background: #f5d8a0 !important;
+            color: #7a6a30 !important;
+        }
+        .banana-theme .reg-sidebar-item.active {
+            background: #f5e0b0 !important;
+        }
+        .banana-theme .reg-sidebar-item.upcoming {
+            background: #f5f0b0 !important;
         }
 
         html {
@@ -69,6 +139,7 @@
             line-height: 1.5;
             padding: 0 16px 40px;
             min-height: 100vh;
+            transition: background var(--transition), color var(--transition);
         }
 
         /* ────────────── СКРОЛЛБАР ────────────── */
@@ -85,6 +156,12 @@
         }
         ::-webkit-scrollbar-thumb:hover {
             background: #c0b8ae;
+        }
+        [data-theme="dark"] ::-webkit-scrollbar-thumb {
+            background: #5a5a5a;
+        }
+        [data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+            background: #707070;
         }
 
         /* ────────────── ЗАГРУЗОЧНЫЙ СПИННЕР ────────────── */
@@ -133,12 +210,6 @@
             font-size: 1.6rem;
             letter-spacing: -0.3px;
             color: var(--text-primary);
-        }
-        .app-header h1 small {
-            font-weight: 300;
-            font-size: 0.9rem;
-            color: var(--text-light);
-            margin-left: 10px;
         }
         .header-actions {
             display: flex;
@@ -204,6 +275,7 @@
             background: transparent;
             box-shadow: none;
             border: 1px solid var(--border-light);
+            color: var(--text-primary);
         }
         .btn-outline:hover {
             background: var(--bg-header);
@@ -227,63 +299,47 @@
             color: var(--text-primary);
         }
 
-        /* ────────────── ВИДЖЕТ РЕГИСТРАЦИЙ ────────────── */
-        .registration-widget {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            padding: 12px 16px;
-            background: var(--bg-card);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow-sm);
-            margin-bottom: 18px;
-            border: 1px solid var(--border-light);
-            min-height: 52px;
-            align-items: center;
+        /* ─── ТЁМНАЯ ТЕМА: КНОПКИ ─── */
+        [data-theme="dark"] .btn-primary {
+            background: #4a6a7a;
+            color: #e8e0d8;
         }
-        .registration-widget .empty {
-            color: var(--text-light);
-            font-size: 0.9rem;
+        [data-theme="dark"] .btn-primary:hover {
+            background: #5a7a8a;
         }
-        .reg-tag {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 5px 14px 5px 16px;
-            border-radius: 30px;
-            font-size: 0.85rem;
-            background: var(--bg-body);
-            border: 1px solid var(--border-light);
-            transition: var(--transition);
+        [data-theme="dark"] .btn-success {
+            background: #4a7a5a;
+            color: #e8e0d8;
         }
-        .reg-tag.active {
-            background: var(--pastel-red);
-            border-color: #e8c8c8;
+        [data-theme="dark"] .btn-success:hover {
+            background: #5a8a6a;
         }
-        .reg-tag.upcoming {
-            background: var(--pastel-yellow);
-            border-color: #e8ddb8;
+        [data-theme="dark"] .btn-danger {
+            background: #7a4a4a;
+            color: #e8e0d8;
         }
-        .reg-tag .reg-name {
-            font-weight: 500;
-            max-width: 160px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+        [data-theme="dark"] .btn-danger:hover {
+            background: #8a5a5a;
         }
-        .reg-tag .reg-link {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-weight: 450;
+        [data-theme="dark"] .btn-warning {
+            background: #7a6a3a;
+            color: #e8e0d8;
         }
-        .reg-tag .reg-link:hover {
+        [data-theme="dark"] .btn-warning:hover {
+            background: #8a7a4a;
+        }
+        [data-theme="dark"] .btn-outline {
             color: var(--text-primary);
-            text-decoration: underline;
+            border-color: var(--border-light);
         }
-        .reg-tag .reg-badge {
-            font-size: 0.7rem;
-            opacity: 0.7;
-            font-weight: 400;
+        [data-theme="dark"] .btn-outline:hover {
+            background: var(--bg-header);
+        }
+        [data-theme="dark"] .btn-icon {
+            color: var(--text-secondary);
+        }
+        [data-theme="dark"] .btn-icon:hover {
+            color: var(--text-primary);
         }
 
         /* ────────────── КАЛЕНДАРЬ ────────────── */
@@ -360,6 +416,10 @@
             background: #f5f0ea;
             border-color: #d5cec6;
         }
+        [data-theme="dark"] .day-cell.today {
+            background: #3a3a3a;
+            border-color: #606060;
+        }
         .day-cell .day-number {
             font-size: 0.8rem;
             font-weight: 450;
@@ -388,14 +448,12 @@
             font-size: 0.7rem;
             font-weight: 450;
             line-height: 1.4;
-            color: #2a2a2a;
             cursor: pointer;
             transition: var(--transition);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             min-height: 20px;
-            background: var(--pastel-blue);
             border: 1px solid rgba(255, 255, 255, 0.3);
             user-select: none;
         }
@@ -403,6 +461,9 @@
             filter: brightness(0.96);
             box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
             z-index: 2;
+        }
+        [data-theme="dark"] .olympiad-bar:hover {
+            filter: brightness(1.1);
         }
         .olympiad-bar.bar-cut-left {
             border-top-left-radius: 0;
@@ -433,19 +494,12 @@
             pointer-events: none;
             box-shadow: var(--shadow-md);
         }
+        [data-theme="dark"] .olympiad-bar .bar-tooltip {
+            background: #e0d8d0;
+            color: #2a2a2a;
+        }
         .olympiad-bar:hover .bar-tooltip {
             display: block;
-        }
-
-        /* Цвета уровней */
-        .olympiad-bar.level-1 {
-            background: var(--level-1);
-        }
-        .olympiad-bar.level-2 {
-            background: var(--level-2);
-        }
-        .olympiad-bar.level-3 {
-            background: var(--level-3);
         }
 
         /* ────────────── МОДАЛЬНОЕ ОКНО ────────────── */
@@ -472,7 +526,7 @@
             }
         }
         .modal-box {
-            background: #fff;
+            background: var(--bg-card);
             border-radius: var(--radius);
             max-width: 620px;
             width: 100%;
@@ -481,6 +535,7 @@
             padding: 28px 32px 24px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
             position: relative;
+            color: var(--text-primary);
         }
         .modal-box .modal-close {
             position: absolute;
@@ -544,6 +599,9 @@
             color: #c05050;
             margin-left: 2px;
         }
+        [data-theme="dark"] .form-group label .required {
+            color: #e07070;
+        }
         .form-group input,
         .form-group select,
         .form-group textarea {
@@ -590,6 +648,13 @@
             margin-top: 18px;
             flex-wrap: wrap;
         }
+        .color-preview {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-light);
+            flex-shrink: 0;
+        }
 
         /* ────────────── САЙДБАР (регистрации) ────────────── */
         .sidebar-toggle {
@@ -621,6 +686,10 @@
             padding: 0 6px;
             text-align: center;
             margin-top: 2px;
+        }
+        [data-theme="dark"] .sidebar-toggle .badge {
+            background: #6a4a4a;
+            color: #f0d8d8;
         }
 
         .registration-sidebar {
@@ -655,6 +724,7 @@
         .registration-sidebar .sidebar-header h3 {
             font-weight: 400;
             font-size: 1.1rem;
+            color: var(--text-primary);
         }
         .registration-sidebar .sidebar-close {
             background: none;
@@ -683,9 +753,16 @@
             border-left-color: var(--pastel-yellow);
             background: #f8f4e8;
         }
+        [data-theme="dark"] .reg-sidebar-item.active {
+            background: #3a2a2a;
+        }
+        [data-theme="dark"] .reg-sidebar-item.upcoming {
+            background: #3a3a2a;
+        }
         .reg-sidebar-item .s-name {
             font-weight: 500;
             font-size: 0.9rem;
+            color: var(--text-primary);
         }
         .reg-sidebar-item .s-meta {
             font-size: 0.78rem;
@@ -769,14 +846,6 @@
                 font-size: 0.75rem;
                 padding: 5px 12px;
             }
-            .registration-widget {
-                padding: 8px 10px;
-                gap: 6px;
-            }
-            .reg-tag {
-                font-size: 0.7rem;
-                padding: 3px 10px;
-            }
         }
 
         /* ────────────── ВСПОМОГАТЕЛЬНЫЕ ────────────── */
@@ -816,18 +885,17 @@
 
     <script>
         // ──────────────────────────────────────────────────────────────
-        // 1.  КОНФИГУРАЦИЯ FIREBASE (ЗАМЕНИТЕ НА СВОИ ДАННЫЕ)
+        // 1.  КОНФИГУРАЦИЯ FIREBASE (уже введены ваши данные)
         // ──────────────────────────────────────────────────────────────
-        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
         const firebaseConfig = {
-          apiKey: "AIzaSyBh9Bi6sHhONQDhjWzEBaxZ7SD-W3ik-TM",
-          authDomain: "olympiads-calendar.firebaseapp.com",
-          databaseURL: "https://olympiads-calendar-default-rtdb.europe-west1.firebasedatabase.app",
-          projectId: "olympiads-calendar",
-          storageBucket: "olympiads-calendar.firebasestorage.app",
-          messagingSenderId: "778345062107",
-          appId: "1:778345062107:web:4866fdf4759d1dcc7476fe",
-          measurementId: "G-3D1XV31JFX"
+            apiKey: "AIzaSyBh9Bi6sHhONQDhjWzEBaxZ7SD-W3ik-TM",
+            authDomain: "olympiads-calendar.firebaseapp.com",
+            databaseURL: "https://olympiads-calendar-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "olympiads-calendar",
+            storageBucket: "olympiads-calendar.firebasestorage.app",
+            messagingSenderId: "778345062107",
+            appId: "1:778345062107:web:4866fdf4759d1dcc7476fe",
+            measurementId: "G-3D1XV31JFX"
         };
 
         firebase.initializeApp(firebaseConfig);
@@ -837,7 +905,7 @@
         // ──────────────────────────────────────────────────────────────
         // 2.  ПОМОЩНИКИ
         // ──────────────────────────────────────────────────────────────
-        const ADMIN_UID = "USUg0QaBBNgtR6NmcIDj02zgqop1"; // ← укажите UID администратора, или оставьте null для авто-определения
+        const ADMIN_UID = "USUg0QaBBNgtR6NmcIDj02zgqop1";
 
         function formatDate(d) {
             if (!d) return '—';
@@ -884,6 +952,26 @@
             const e = toDate(end);
             if (!d || !s || !e) return false;
             return d >= s && d <= e;
+        }
+
+        // Генерация пастельного цвета (HSL)
+        function generatePastelColor() {
+            const hue = Math.floor(Math.random() * 360);
+            const sat = 40 + Math.floor(Math.random() * 30); // 40–70%
+            const light = 70 + Math.floor(Math.random() * 20); // 70–90%
+            return `hsl(${hue}, ${sat}%, ${light}%)`;
+        }
+
+        // Функция для определения цвета текста (чёрный или белый) по яркости фона
+        function getContrastColor(hslColor) {
+            // Извлекаем Lightness из hsl(h, s%, l%)
+            const match = hslColor.match(/hsl\(\s*(\d+)\s*,\s*(\d+)%\s*,\s*(\d+)%\s*\)/);
+            if (match) {
+                const light = parseInt(match[3], 10);
+                return light > 55 ? '#2a2a2a' : '#f0f0f0';
+            }
+            // Если не удалось распарсить, возвращаем тёмный по умолчанию
+            return '#2a2a2a';
         }
 
         // ──────────────────────────────────────────────────────────────
@@ -959,9 +1047,8 @@
                 const monthStart = new Date(Math.max(firstDay.getTime(), start.getTime()));
                 const monthEnd = new Date(Math.min(lastDay.getTime(), end.getTime()));
 
-                // Определяем первый день недели (понедельник)
                 let weekStart = new Date(monthStart);
-                const dow = weekStart.getDay(); // 0=воскр
+                const dow = weekStart.getDay();
                 const diff = (dow === 0 ? 6 : dow - 1);
                 weekStart.setDate(weekStart.getDate() - diff);
 
@@ -1006,7 +1093,6 @@
                     result.push(o);
                 }
             }
-            // сортировка по длительности (длинные сверху)
             result.sort((a, b) => {
                 const da = dateOnly(a.endTime) - dateOnly(a.startTime);
                 const db = dateOnly(b.endTime) - dateOnly(b.startTime);
@@ -1126,12 +1212,12 @@
                 registrationStart: '',
                 registrationEnd: '',
                 registrationUrl: '',
+                color: generatePastelColor(),
             };
 
             const [form, setForm] = useState(() => {
                 if (olympiad) {
                     const f = { ...olympiad };
-                    // Преобразуем timestamp в строку для input
                     const toInput = (val) => {
                         if (!val) return '';
                         const d = toDate(val);
@@ -1142,6 +1228,7 @@
                     f.endTime = toInput(f.endTime);
                     f.registrationStart = toInput(f.registrationStart);
                     f.registrationEnd = toInput(f.registrationEnd);
+                    if (!f.color) f.color = generatePastelColor();
                     return f;
                 }
                 return { ...empty };
@@ -1155,7 +1242,6 @@
 
             const handleSubmit = async (e) => {
                 e.preventDefault();
-                // Валидация
                 if (!form.name.trim()) { alert('Введите название олимпиады'); return; }
                 if (!form.level) { alert('Выберите уровень'); return; }
                 if (!form.direction.trim()) { alert('Введите направление'); return; }
@@ -1195,6 +1281,7 @@
                         registrationEnd: form.registrationRequired ? firebase.firestore.Timestamp.fromDate(new Date(
                             form.registrationEnd)) : null,
                         registrationUrl: form.registrationRequired ? form.registrationUrl.trim() : null,
+                        color: form.color || generatePastelColor(),
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
                     };
 
@@ -1320,6 +1407,27 @@
                     })
                 ),
                 React.createElement('div', { className: 'form-group' },
+                    React.createElement('label', null, 'Цвет олимпиады'),
+                    React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: '10px' } },
+                        React.createElement('div', {
+                            className: 'color-preview',
+                            style: { background: form.color || '#cccccc' }
+                        }),
+                        React.createElement('input', {
+                            type: 'text',
+                            value: form.color || '',
+                            onChange: e => handleChange('color', e.target.value),
+                            placeholder: 'hsl(…, …%, …%)',
+                            style: { flex: 1 }
+                        }),
+                        React.createElement('button', {
+                            type: 'button',
+                            className: 'btn btn-outline btn-sm',
+                            onClick: () => handleChange('color', generatePastelColor())
+                        }, '🔄')
+                    )
+                ),
+                React.createElement('div', { className: 'form-group' },
                     React.createElement('div', { className: 'checkbox-group' },
                         React.createElement('input', {
                             type: 'checkbox',
@@ -1374,40 +1482,36 @@
         }
 
         // ──── ПОЛОСА ОЛИМПИАДЫ ────
-        function OlympiadBar({ olympiad, isFirst, isLast, onRightClick, onEdit }) {
-            const levelClass = olympiad.level === 'Первого уровня' ? 'level-1' :
-                olympiad.level === 'Второго уровня' ? 'level-2' :
-                olympiad.level === 'Третьего уровня' ? 'level-3' : '';
-
+        function OlympiadBar({ olympiad, isFirst, isLast, onRightClick, onEdit, onLeftClick }) {
             let cutClass = '';
             if (!isFirst && !isLast) cutClass = 'bar-cut-both';
             else if (!isFirst) cutClass = 'bar-cut-left';
             else if (!isLast) cutClass = 'bar-cut-right';
+
+            const bgColor = olympiad.color || '#dce8f0';
+            // Вычисляем контрастный цвет текста
+            const textColor = getContrastColor(bgColor);
 
             const handleContext = (e) => {
                 e.preventDefault();
                 if (onRightClick) onRightClick(olympiad);
             };
 
-            const handleDouble = (e) => {
+            const handleLeftClick = (e) => {
                 if (e.ctrlKey || e.metaKey) {
                     e.preventDefault();
                     if (onEdit) onEdit(olympiad);
-                }
-            };
-
-            const handleClick = (e) => {
-                if (e.ctrlKey || e.metaKey) {
-                    e.preventDefault();
-                    if (onEdit) onEdit(olympiad);
+                } else {
+                    // обычный клик — открываем модалку
+                    if (onLeftClick) onLeftClick(olympiad);
                 }
             };
 
             return React.createElement('div', {
-                className: `olympiad-bar ${levelClass} ${cutClass}`,
+                className: `olympiad-bar ${cutClass}`,
+                style: { backgroundColor: bgColor, color: textColor },
                 onContextMenu: handleContext,
-                onDoubleClick: handleDouble,
-                onClick: handleClick,
+                onClick: handleLeftClick,
                 title: olympiad.name || 'Без названия'
             },
                 olympiad.name || 'Без названия',
@@ -1422,13 +1526,9 @@
         }
 
         // ──── ЯЧЕЙКА ДНЯ ────
-        function DayCell({ date, olympiads, isToday, isOtherMonth, onBarRightClick, onBarEdit }) {
+        function DayCell({ date, olympiads, isToday, isOtherMonth, onBarRightClick, onBarEdit, onBarLeftClick }) {
             const dayBars = getBarsForDay(olympiads, date);
             const dayNum = date.getDate();
-
-            // Группировка полос по "связности" через неделю
-            // Для каждой полосы определяем, является ли она первой/последней в этой ячейке
-            // (упрощённо: если полоса начинается в этот день — isFirst, если заканчивается — isLast)
 
             const bars = dayBars.map(o => {
                 const start = dateOnly(o.startTime);
@@ -1441,7 +1541,6 @@
                 };
             });
 
-            // Если несколько полос в один день, они располагаются друг под другом
             return React.createElement('div', {
                 className: `day-cell ${isOtherMonth ? 'other-month' : ''} ${isToday ? 'today' : ''}`
             },
@@ -1454,17 +1553,18 @@
                         isLast: o.isLast,
                         onRightClick: onBarRightClick,
                         onEdit: onBarEdit,
+                        onLeftClick: onBarLeftClick,
                     }))
                 )
             );
         }
 
         // ──── НЕДЕЛЯ ────
-        function WeekRow({ week, olympiads, today, onBarRightClick, onBarEdit }) {
+        function WeekRow({ week, olympiads, today, onBarRightClick, onBarEdit, onBarLeftClick }) {
             return React.createElement('div', { className: 'week-row' },
                 week.map((day, idx) => {
                     const isToday = today && isSameDay(day, today);
-                    const isOtherMonth = false; // определяем в месяце
+                    const isOtherMonth = false;
                     return React.createElement(DayCell, {
                         key: idx,
                         date: day,
@@ -1473,16 +1573,15 @@
                         isOtherMonth,
                         onBarRightClick,
                         onBarEdit,
+                        onBarLeftClick,
                     });
                 })
             );
         }
 
         // ──── МЕСЯЦ ────
-        function MonthBlock({ month, olympiads, today, onBarRightClick, onBarEdit }) {
+        function MonthBlock({ month, olympiads, today, onBarRightClick, onBarEdit, onBarLeftClick }) {
             const weekDays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
-
-            // Проверяем, принадлежит ли день этому месяцу
             const isInMonth = (d) => d.getMonth() === month.month && d.getFullYear() === month.year;
 
             return React.createElement('div', { className: 'month-block' },
@@ -1491,44 +1590,36 @@
                     weekDays.map(d => React.createElement('span', { key: d }, d))
                 ),
                 month.weeks.map((week, wi) => {
-                    // Проверяем, есть ли в этой неделе дни из этого месяца
                     const hasMonthDays = week.some(d => isInMonth(d));
                     if (!hasMonthDays) return null;
                     return React.createElement(WeekRow, {
                         key: wi,
-                        week: week.map(d => {
-                            // Для корректной работы isOtherMonth передаём флаг
-                            return d;
-                        }),
+                        week: week,
                         olympiads,
                         today,
                         onBarRightClick,
                         onBarEdit,
-                        // передаём month для определения other-month
-                        _isInMonth: isInMonth,
+                        onBarLeftClick,
                     });
                 })
             );
         }
 
         // ──── КАЛЕНДАРЬ ────
-        function Calendar({ olympiads, onBarRightClick, onBarEdit }) {
+        function Calendar({ olympiads, onBarRightClick, onBarEdit, onBarLeftClick }) {
             const [today] = useState(new Date());
             const scrollRef = useRef(null);
             const [hasScrolled, setHasScrolled] = useState(false);
 
-            const startDate = new Date(2026, 7, 1); // 1 августа 2026
-            const endDate = new Date(2027, 7, 1); // 1 августа 2027
+            const startDate = new Date(2026, 7, 1);
+            const endDate = new Date(2027, 7, 1);
             const months = buildCalendar(startDate, endDate);
 
-            // Прокрутка к текущей неделе при загрузке
             useEffect(() => {
                 if (!scrollRef.current || hasScrolled) return;
-                // Ищем неделю, содержащую сегодня
                 const todayStr = dateOnly(today)?.toISOString().slice(0, 10);
                 if (!todayStr) return;
 
-                // Ищем в месяцах
                 let found = false;
                 for (let mi = 0; mi < months.length; mi++) {
                     const m = months[mi];
@@ -1536,7 +1627,6 @@
                         const week = m.weeks[wi];
                         for (const d of week) {
                             if (dateOnly(d)?.toISOString().slice(0, 10) === todayStr) {
-                                // Нашли неделю, прокручиваем к ней
                                 const target = scrollRef.current.querySelector(
                                     `.month-block:nth-child(${mi+1}) .week-row:nth-child(${wi+2})`
                                 );
@@ -1556,7 +1646,6 @@
                 setHasScrolled(true);
             }, [months, today, hasScrolled]);
 
-            // Не показываем если нет данных
             if (months.length === 0) {
                 return React.createElement('div', { className: 'text-center text-muted', style: { padding: '40px 0' } },
                     'Нет данных для отображения'
@@ -1572,54 +1661,9 @@
                         today,
                         onBarRightClick,
                         onBarEdit,
+                        onBarLeftClick,
                     }))
                 )
-            );
-        }
-
-        // ──── ВИДЖЕТ РЕГИСТРАЦИЙ ────
-        function RegistrationWidget({ olympiads }) {
-            const now = new Date();
-            const active = [];
-            const upcoming = [];
-
-            for (const o of olympiads) {
-                if (!o.registrationRequired) continue;
-                const start = toDate(o.registrationStart);
-                const end = toDate(o.registrationEnd);
-                if (!start || !end) continue;
-                if (now >= start && now <= end) {
-                    active.push(o);
-                } else if (now < start) {
-                    const diff = (start - now) / (1000 * 60 * 60 * 24);
-                    if (diff < 3) upcoming.push(o);
-                }
-            }
-
-            if (active.length === 0 && upcoming.length === 0) {
-                return React.createElement('div', { className: 'registration-widget' },
-                    React.createElement('span', { className: 'empty' }, '📋 Нет активных или предстоящих регистраций')
-                );
-            }
-
-            const items = [...active.map(o => ({ ...o, _status: 'active' })), ...upcoming.map(o => ({ ...o,
-                _status: 'upcoming' }))];
-
-            return React.createElement('div', { className: 'registration-widget' },
-                items.map(o => {
-                    const status = o._status;
-                    const label = status === 'active' ? '🔴 Регистрация открыта' : '🟡 Скоро открытие';
-                    return React.createElement('div', { key: o.id, className: `reg-tag ${status}` },
-                        React.createElement('span', { className: 'reg-name' }, o.name || 'Без названия'),
-                        React.createElement('span', { className: 'reg-badge' }, label),
-                        o.registrationUrl && React.createElement('a', {
-                            href: o.registrationUrl,
-                            target: '_blank',
-                            rel: 'noopener',
-                            className: 'reg-link'
-                        }, 'Перейти →')
-                    );
-                })
             );
         }
 
@@ -1633,7 +1677,7 @@
                 const start = toDate(o.registrationStart);
                 const end = toDate(o.registrationEnd);
                 if (!start || !end) continue;
-                if (now <= end) { // все будущие и активные
+                if (now <= end) {
                     const status = (now >= start && now <= end) ? 'active' : 'upcoming';
                     items.push({ ...o, _status: status, _start: start, _end: end });
                 }
@@ -1680,10 +1724,73 @@
             const [editingOlympiad, setEditingOlympiad] = useState(null);
             const [showForm, setShowForm] = useState(false);
             const [sidebarOpen, setSidebarOpen] = useState(false);
+            const [theme, setTheme] = useState(() => {
+                return localStorage.getItem('theme') || 'light';
+            });
+            const [bananaActive, setBananaActive] = useState(false);
+            const [previousTheme, setPreviousTheme] = useState('light');
+            const [clickCount, setClickCount] = useState(0);
+            const [clickTimer, setClickTimer] = useState(null);
+
+            // Применяем тему и класс банана
+            useEffect(() => {
+                document.documentElement.setAttribute('data-theme', theme);
+                localStorage.setItem('theme', theme);
+                // Убираем банановый класс, если он был
+                document.documentElement.classList.remove('banana-theme');
+                if (bananaActive) {
+                    document.documentElement.classList.add('banana-theme');
+                }
+            }, [theme, bananaActive]);
+
+            const toggleTheme = () => {
+                // Если банановая активна — выключаем её и возвращаем предыдущую тему
+                if (bananaActive) {
+                    setBananaActive(false);
+                    setTheme(previousTheme);
+                    setClickCount(0);
+                    if (clickTimer) {
+                        clearTimeout(clickTimer);
+                        setClickTimer(null);
+                    }
+                    return;
+                }
+
+                // Обработка пасхалки: считаем клики
+                const now = Date.now();
+                if (clickCount === 0) {
+                    // первый клик, запускаем таймер на 10 секунд
+                    const timer = setTimeout(() => {
+                        setClickCount(0);
+                        setClickTimer(null);
+                    }, 10000);
+                    setClickTimer(timer);
+                }
+                const newCount = clickCount + 1;
+                setClickCount(newCount);
+                if (newCount > 5) {
+                    // Активируем банановую тему
+                    setPreviousTheme(theme);
+                    setBananaActive(true);
+                    setClickCount(0);
+                    if (clickTimer) {
+                        clearTimeout(clickTimer);
+                        setClickTimer(null);
+                    }
+                    return;
+                }
+
+                // Обычное переключение светлая/тёмная
+                setTheme(prev => prev === 'light' ? 'dark' : 'light');
+            };
 
             const isAdmin = user && (ADMIN_UID ? user.uid === ADMIN_UID : true);
 
             const handleBarRightClick = (olympiad) => {
+                setSelectedOlympiad(olympiad);
+            };
+
+            const handleBarLeftClick = (olympiad) => {
                 setSelectedOlympiad(olympiad);
             };
 
@@ -1738,8 +1845,7 @@
             if (authLoading || loading) {
                 return React.createElement('div', { className: 'app' },
                     React.createElement('div', { className: 'app-header' },
-                        React.createElement('h1', null, '📅 Олимпиады 2026–2027', React.createElement('small', null,
-                            'учебный год'))
+                        React.createElement('h1', null, '📅 Расписание олимпиад')
                     ),
                     React.createElement(Spinner, { text: 'Загрузка...' })
                 );
@@ -1748,7 +1854,7 @@
             if (error) {
                 return React.createElement('div', { className: 'app' },
                     React.createElement('div', { className: 'app-header' },
-                        React.createElement('h1', null, '📅 Олимпиады 2026–2027')
+                        React.createElement('h1', null, '📅 Расписание олимпиад')
                     ),
                     React.createElement('div', { style: { padding: 40, textAlign: 'center', color: '#8a5a5a' } },
                         '⚠️ Ошибка загрузки данных: ', error,
@@ -1762,8 +1868,7 @@
             return React.createElement('div', { className: 'app' },
                 // Шапка
                 React.createElement('div', { className: 'app-header' },
-                    React.createElement('h1', null, '📅 Олимпиады 2026–2027', React.createElement('small', null,
-                            'учебный год')),
+                    React.createElement('h1', null, '📅 Расписание олимпиад'),
                     React.createElement('div', { className: 'header-actions' },
                         isAdmin && React.createElement('button', { className: 'btn btn-primary', onClick: handleAdd },
                             '➕ Добавить'
@@ -1779,18 +1884,23 @@
                             React.createElement('button', { className: 'btn btn-outline btn-sm', onClick: handleLogout },
                                 'Выйти'
                             )
+                        ),
+                        React.createElement('button', {
+                            className: 'btn btn-outline btn-sm',
+                            onClick: toggleTheme,
+                            style: { marginLeft: '4px' }
+                        },
+                            bananaActive ? '🍌' : (theme === 'light' ? '🌙' : '☀️')
                         )
                     )
                 ),
-
-                // Виджет регистраций
-                React.createElement(RegistrationWidget, { olympiads }),
 
                 // Календарь
                 React.createElement(Calendar, {
                     olympiads,
                     onBarRightClick: handleBarRightClick,
                     onBarEdit: handleBarEdit,
+                    onBarLeftClick: handleBarLeftClick,
                 }),
 
                 // Кнопка-триггер сайдбара
